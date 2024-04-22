@@ -76,3 +76,111 @@ Citations:
 [18] https://stackoverflow.com/questions/4325639/android-calling-javascript-functions-in-webview
 [19] https://github.com/i-love-flamingo/example-helloworld
 [20] https://www.simplilearn.com/tutorials/angular-tutorial/angular-hello-world
+
+-----
+
+在使用Kotlin语言编写的Android应用中进行运行时代码插桩通常涉及到使用字节码操作库，如ASM，来修改编译后的字节码。以下是一个简单的示例，展示如何在一个使用Kotlin编写的Android应用中插入"Hello World"日志输出，以及如何设置项目以支持这种插桩。
+
+### 步骤 1: 创建一个新的Android项目
+
+首先，你需要在Android Studio中创建一个新的Android项目。选择Kotlin作为项目的编程语言。
+
+### 步骤 2: 添加ASM库依赖
+
+在项目的`build.gradle`文件中添加ASM库的依赖，以便进行字节码操作。你可以添加如下依赖：
+
+```gradle
+dependencies {
+    implementation 'org.ow2.asm:asm:9.1'
+    implementation 'org.ow2.asm:asm-util:9.1'
+    implementation 'org.ow2.asm:asm-commons:9.1'
+}
+```
+
+### 步骤 3: 创建一个Gradle插件进行插桩
+
+在`buildSrc`目录下创建一个新的Gradle插件。如果你的项目中没有`buildSrc`目录，你需要先创建它。这个目录允许你编写并包含自定义的Gradle逻辑。
+
+在`buildSrc`中，创建以下文件结构：
+
+```
+buildSrc/
+└── src/
+    └── main/
+        ├── groovy/
+        │   └── MyPlugin.groovy
+        └── resources/
+            └── META-INF/
+                └── gradle-plugins/
+                    └── myplugin.properties
+```
+
+在`MyPlugin.groovy`文件中，编写一个简单的插件，使用ASM来修改字节码：
+
+```groovy
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import com.android.build.gradle.AppExtension
+import org.gradle.api.tasks.compile.JavaCompile
+
+class MyPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.afterEvaluate {
+            AppExtension android = project.extensions.findByType(AppExtension)
+            android.applicationVariants.all { variant ->
+                JavaCompile javaCompile = variant.javaCompileProvider.get()
+                javaCompile.doLast {
+                    // 这里添加ASM代码操作字节码
+                    println("Hello World from ASM!")
+                }
+            }
+        }
+    }
+}
+```
+
+在`myplugin.properties`文件中，指定插件的实现类：
+
+```
+implementation-class=MyPlugin
+```
+
+### 步骤 4: 应用你的Gradle插件
+
+在项目的`build.gradle`文件中应用你刚刚创建的插件：
+
+```gradle
+plugins {
+    id 'myplugin'
+}
+```
+
+### 步骤 5: 运行你的应用
+
+现在，当你构建并运行你的应用时，ASM插件将会在编译过程中输出"Hello World"，表示插桩已经被执行。
+
+这个示例展示了如何设置一个简单的运行时代码插桩环境。在实际应用中，你可能需要编写更复杂的ASM代码来修改特定的方法或类的字节码。
+
+Citations:
+[1] https://juejin.cn/post/6844904185633177608
+[2] https://developer.android.com/samples
+[3] https://blog.csdn.net/whjk20/article/details/126606348
+[4] https://blog.csdn.net/maniuT/article/details/134077405
+[5] https://www.cnblogs.com/xiaowenshu/p/10382177.html
+[6] https://juejin.cn/post/7284143489737719848
+[7] https://juejin.cn/post/7089328997598756894
+[8] https://juejin.cn/post/7182178552207376421
+[9] https://blog.yorek.xyz/android/paid/master/bytecode/
+[10] https://www.volcengine.com/theme/6597249-S-7-1
+[11] https://cloud.tencent.com/developer/article/1651227
+[12] https://www.volcengine.com/theme/3861483-D-7-1
+[13] https://juejin.cn/post/7079229035254906888
+[14] https://pytorch.org/mobile/android/
+[15] https://blog.csdn.net/aidijava/article/details/136047378
+[16] https://blog.csdn.net/weixin_40425640/article/details/127770453
+[17] https://developer.aliyun.com/article/175942
+[18] https://developer.aliyun.com/article/864244
+[19] https://blog.csdn.net/leven98/article/details/123354865
+[20] https://developer.aliyun.com/article/864197
+
+
